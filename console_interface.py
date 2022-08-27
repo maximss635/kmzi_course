@@ -1,6 +1,3 @@
-from utils import WithLogger
-
-
 class BaseConsoleInterface:
     def __init__(self, prommt):
         self.__prommt = prommt
