@@ -27,14 +27,20 @@ class BaseServer(WithLogger):
         self._connections = dict()  # [socket, addr]
         self._connections[self._server_socket] = "0.0.0.0"
 
-        self._logger.debug("Init server")
+        self._flag_stop = False
+        self._thread = None
+
+        self._logger.debug("Init server, host=%s, port=%d", self.__host, self.__port)
 
     def __del__(self):
+        self._server_socket.close()
+        self._connections.pop(self._server_socket)
+
         for s in copy(self._connections):
             self._on_close_connection(s)
 
     def _event_loop(self):
-        while True:
+        while self._flag_stop:
             events, _, _ = select.select(self._connections.keys(), [], [])
             for event in events:
                 if event is self._server_socket:
@@ -86,28 +92,31 @@ class BaseServer(WithLogger):
         return "OK"
 
     def run(self):
-        self._logger.debug("Start listening")
-
         try:
-            self._server_socket.bind((self.__host, self.__port))
-        except OSError as err:
-            self._logger.error(err)
-            return
+            self._logger.debug("Start listening")
 
-        self._server_socket.listen()
-        self._event_loop()
+            self._server_socket.bind((self.__host, self.__port))
+            self._server_socket.listen()
+            self._event_loop()
+        except OSError as err:
+            self._logger.debug(err)
+            raise err
 
     def run_in_backround_thread(self):
-        self._logger.debug("Start listening")
-
         try:
+            self._logger.debug("Start listening")
+
             self._server_socket.bind((self.__host, self.__port))
+            self._server_socket.listen()
+            self._thread = threading.Thread(target=self._event_loop)
+            self._thread.start()
         except OSError as err:
             self._logger.error(err)
-            return
+            raise err
 
-        self._server_socket.listen()
-        threading.Thread(target=self._event_loop).start()
+    def stop(self):
+        if self._thread:
+            self._flag_stop = True
 
 
 class BaseClient(WithLogger):

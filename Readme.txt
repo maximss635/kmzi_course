@@ -1,7 +1,7 @@
 Запуск сервера
-python server.py
+python server.py --host *HOST* --port *PORT*
 
 Запуск клиента
-python client.py
+python client.py --host *HOST* --port *PORT*
 
 В logs/ можно будет почитать логи отдельно клиента и сервера

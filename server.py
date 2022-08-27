@@ -1,3 +1,4 @@
+import argparse
 import ast
 
 from api import ClientAPI, ServerAPI
@@ -54,10 +55,15 @@ class Server(BaseServer):
 
 class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
     def __init__(self):
-        BaseConsoleInterface.__init__(self, "server> ")
+        BaseConsoleInterface.__init__(self, "server# ")
         WithLogger.__init__(self, "server")
 
         self._server_api = ServerAPI()
+
+    def run(self):
+        BaseConsoleInterface.run(self)
+
+        self._logger.debug("Exit from server console")
 
     def _handle_input(self, inp):
         self._logger.debug("Handle input: %s", inp)
@@ -79,10 +85,21 @@ class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", required=True)
+    parser.add_argument("--port", required=True, type=int)
+    args = parser.parse_args()
+
     command_handler = CommandHandler()
 
-    server = Server("localhost", 9_000)
-    server.run_in_backround_thread()
+    try:
+        server = Server(args.host, args.port)
+        server.run_in_backround_thread()
+    except OSError as err:
+        print(err)
+        exit(1)
 
     interface = ServerConsoleInterface()
     interface.run()
+
+    server.stop()
