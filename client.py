@@ -1,8 +1,8 @@
 import json
 
 from console_interface import BaseConsoleInterface
+from socketlib import BaseClient, ErrorInServer, ServerNotAnswerError
 from utils import WithLogger
-from socketlib import BaseClient, ServerNotAnswerError, ErrorInServer
 
 
 class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
@@ -33,11 +33,12 @@ class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
     def __parse_message(self, raw_message):
         message = dict()
         message["raw"] = raw_message
+        message["method"] = "add_ballot"
 
         return json.dumps(message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         interface = ClientConsoleInterface()
     except ConnectionRefusedError:

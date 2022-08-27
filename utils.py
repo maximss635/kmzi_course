@@ -34,6 +34,7 @@ def call_with_lock(func):
         try:
             ret = func(*args, **kwargs)
         except BaseException as err:
+            # Эту шелупонь надо городить чтобы лок опускался также при эксепшенах
             raise err
         finally:
             lock.release()
@@ -41,3 +42,20 @@ def call_with_lock(func):
         return ret
 
     return wrap
+
+
+class Signleton:
+    __instances = dict()
+
+    def __init__(self):
+        self.__instances[self.__class__.__name__] = self
+
+    @classmethod
+    def instance(cls):
+        if cls.__name__ not in cls.__instances:
+            instance = cls.__new__(cls)
+            cls.__init__(instance)
+            cls.__instances[cls.__name__] = instance
+            return instance
+
+        return cls.__instances[cls.__name__]

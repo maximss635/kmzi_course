@@ -1,7 +1,18 @@
+from utils import Signleton
+
+
+class CommonStorage(Signleton):
+    def __init__(self):
+        Signleton.__init__(self)
+
+        self.ballots = list()
+
+
 class ClientAPI:
-    pass
+    def add_ballot(self):
+        CommonStorage.instance().ballots.append(len(CommonStorage.instance().ballots))
 
 
 class ServerAPI:
-    def debug(self):
-        return "debug_result"
+    def show_ballots(self):
+        return str(CommonStorage.instance().ballots)

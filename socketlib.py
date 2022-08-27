@@ -65,7 +65,10 @@ class BaseServer(WithLogger):
             answer = str(err)
             ret_code = 1
 
-        raw_answer = ret_code.to_bytes(1, byteorder="big") + bytes(answer, "utf-8")
+        raw_answer = ret_code.to_bytes(1, byteorder="big")
+        if answer:
+            raw_answer += bytes(answer, "utf-8")
+
         self._logger.debug(
             "Send answer to %s: %s (ret_code=%d)",
             self._connections[event],
@@ -79,8 +82,7 @@ class BaseServer(WithLogger):
         event.close()
         self._connections.pop(event)
 
-    @staticmethod
-    def _handle_message(msg):
+    def _handle_message(self, msg):
         return "OK"
 
     def run(self):
