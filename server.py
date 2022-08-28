@@ -2,9 +2,8 @@ import argparse
 import ast
 
 from api import ClientAPI, ServerAPI
-from console_interface import BaseConsoleInterface
 from socketlib import BaseServer
-from utils import WithLogger, call_with_lock
+from utils import BaseConsoleInterface, WithLogger, call_with_lock
 
 
 class MessageFormatError(BaseException):
@@ -99,7 +98,5 @@ if __name__ == "__main__":
         print(err)
         exit(1)
 
-    interface = ServerConsoleInterface()
-    interface.run()
-
+    ServerConsoleInterface().run()
     server.stop()

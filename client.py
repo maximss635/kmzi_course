@@ -1,9 +1,8 @@
 import argparse
 import json
 
-from console_interface import BaseConsoleInterface
 from socketlib import BaseClient, ErrorInServer, ServerNotAnswerError
-from utils import WithLogger
+from utils import BaseConsoleInterface, WithLogger
 
 
 class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
@@ -18,7 +17,11 @@ class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
             raise err
 
     def run(self):
-        BaseConsoleInterface.run(self)
+        try:
+            BaseConsoleInterface.run(self)
+        except ConnectionRefusedError as err:
+            self._print("% Error with connection to the server")
+            self._logger.error(err)
 
         self._logger.debug("Exit from client console")
 

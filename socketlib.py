@@ -1,3 +1,4 @@
+import logging
 import select
 import socket
 import threading
@@ -40,8 +41,9 @@ class BaseServer(WithLogger):
             self._on_close_connection(s)
 
     def _event_loop(self):
-        while self._flag_stop:
-            events, _, _ = select.select(self._connections.keys(), [], [])
+        while not self._flag_stop:
+            events, _, _ = select.select(self._connections.keys(), [], [], 0.2)
+            self._logger.debug("after select events={}".format(events))
             for event in events:
                 if event is self._server_socket:
                     self._on_open_connection()
@@ -55,6 +57,7 @@ class BaseServer(WithLogger):
 
     def _on_new_message(self, event):
         data = event.recv(512)
+        SOCKET_LOGGER.debug("[srv recv] {}".format(data))
 
         if not data:
             self._on_close_connection(event)
@@ -82,6 +85,7 @@ class BaseServer(WithLogger):
             ret_code,
         )
         event.send(raw_answer)
+        SOCKET_LOGGER.debug("[srv send] {}".format(raw_answer))
 
     def _on_close_connection(self, event):
         self._logger.debug("Close connection with %s", self._connections[event])
@@ -91,28 +95,25 @@ class BaseServer(WithLogger):
     def _handle_message(self, msg):
         return "OK"
 
-    def run(self):
+    def _prerun_init(self):
         try:
-            self._logger.debug("Start listening")
-
             self._server_socket.bind((self.__host, self.__port))
             self._server_socket.listen()
-            self._event_loop()
+            self._server_socket.setblocking(False)
         except OSError as err:
             self._logger.debug(err)
             raise err
 
-    def run_in_backround_thread(self):
-        try:
-            self._logger.debug("Start listening")
+    def run(self):
+        self._logger.debug("Start listening")
+        self._prerun_init()
+        self._event_loop()
 
-            self._server_socket.bind((self.__host, self.__port))
-            self._server_socket.listen()
-            self._thread = threading.Thread(target=self._event_loop)
-            self._thread.start()
-        except OSError as err:
-            self._logger.error(err)
-            raise err
+    def run_in_backround_thread(self):
+        self._logger.debug("Start listening")
+        self._prerun_init()
+        self._thread = threading.Thread(target=self._event_loop)
+        self._thread.start()
 
     def stop(self):
         if self._thread:
@@ -141,12 +142,18 @@ class BaseClient(WithLogger):
 
         self._logger.debug("Send mesage: %s", msg)
         self._s.send(msg)
+        SOCKET_LOGGER.debug("[cli send] {}".format(msg))
 
         try:
             answer = self._s.recv(512)
         except TimeoutError as err:
             self._logger.error("Not answer from server")
             raise ServerNotAnswerError() from err
+
+        if not answer:
+            raise ConnectionRefusedError()
+
+        SOCKET_LOGGER.debug("[cli recv] {}".format(answer))
 
         ret_code = int(answer[0])
         answer = answer[1:].decode("utf-8")
@@ -160,3 +167,10 @@ class BaseClient(WithLogger):
             raise ErrorInServer(answer)
 
         return answer
+
+
+SOCKET_LOGGER = logging.getLogger("SOCKET_LOGGER")
+handler = logging.FileHandler("logs/socket_history.log")
+handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
+SOCKET_LOGGER.addHandler(handler)
+SOCKET_LOGGER.setLevel(logging.DEBUG)
