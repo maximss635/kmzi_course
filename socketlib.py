@@ -43,7 +43,6 @@ class BaseServer(WithLogger):
     def _event_loop(self):
         while not self._flag_stop:
             events, _, _ = select.select(self._connections.keys(), [], [], 0.2)
-            self._logger.debug("after select events={}".format(events))
             for event in events:
                 if event is self._server_socket:
                     self._on_open_connection()

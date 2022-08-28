@@ -28,7 +28,13 @@ class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
     def _handle_input(self, inp) -> str:
         self._logger.debug("Handle input: %s", inp)
 
-        msg = self.__parse_message(inp)
+        try:
+            msg = self.__parse_message(inp)
+        except SyntaxError as err:
+            err_msg = "% Syntax error"
+            if err.args:
+                err_msg += ": " + err.args
+            return err_msg
 
         try:
             return self.__client.send_message(msg)
@@ -41,10 +47,32 @@ class ClientConsoleInterface(BaseConsoleInterface, WithLogger):
 
     def __parse_message(self, raw_message):
         message = dict()
+        raw_message = raw_message.strip()
         message["raw"] = raw_message
-        message["method"] = "add_ballot"
 
-        return json.dumps(message)
+        if raw_message == "help":
+            message["method"] = "help"
+            return json.dumps(message)
+        if raw_message.startswith("get"):
+            raw_message = raw_message.split(" ")
+            raw_message = [i for i in raw_message if i]
+            if len(raw_message) != 2:
+                raise SyntaxError()
+            if raw_message[1] != "bulletin":
+                raise SyntaxError()
+            message["method"] = "get_bulletin"
+            return json.dumps(message)
+        if raw_message.startswith("upload"):
+            raw_message = raw_message.split(" ")
+            raw_message = [i for i in raw_message if i]
+            if len(raw_message) != 2:
+                raise SyntaxError()
+            if raw_message[1] != "ballot":
+                raise SyntaxError
+            message["method"] = "upload_ballot"
+            return json.dumps(message)
+
+        raise SyntaxError()
 
 
 if __name__ == "__main__":

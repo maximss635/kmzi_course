@@ -1,5 +1,6 @@
 import argparse
 import ast
+import json
 
 from api import ClientAPI, ServerAPI
 from socketlib import BaseServer
@@ -29,14 +30,17 @@ class CommandHandler(WithLogger):
         if not method_name:
             raise MessageFormatError("Need field 'method'")
 
-        command = getattr(api, method_name, None)
-        if not command:
+        method = getattr(api, method_name, None)
+        if not method:
             raise InternalLogicError("No such command: {}".format(method_name))
 
         self._logger.debug(
-            "Calling method %s for api %s", command.__name__, api.__class__.__name__
+            "Calling method %s for api %s with command %s",
+            method.__name__,
+            api.__class__.__name__,
+            command,
         )
-        return command()
+        return method(command)
 
 
 class Server(BaseServer):
@@ -67,20 +71,54 @@ class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
     def _handle_input(self, inp):
         self._logger.debug("Handle input: %s", inp)
 
-        command = self.__parse_message(inp)
+        try:
+            command = self.__parse_message(inp)
+        except SyntaxError as e:
+            err_msg = "% Syntax error"
+            if e.args:
+                err_msg += ": " + e.args
+            return err_msg
 
         try:
             return command_handler.handle_command(command, self._server_api)
-        except BaseException as err:
-            self._logger.error(err)
-            return "% " + str(err)
+        except BaseException as e:
+            self._logger.error(e)
+            return "% " + str(e)
 
     def __parse_message(self, msg) -> dict:
         command = dict()
+        msg = msg.strip()
         command["raw"] = msg
-        command["method"] = "show_ballots"
 
-        return command
+        if msg == "help":
+            command["method"] = "help"
+            return command
+
+        if msg.startswith("show"):
+            msg = msg.split(" ")
+            msg = [i for i in msg if i]
+            if len(msg) != 2:
+                raise SyntaxError()
+            if msg[1] == "ballots":
+                command["method"] = "show_all_ballots"
+                return command
+            if msg[1] == "calculations":
+                command["method"] = "show_calculations"
+                return command
+            raise SyntaxError()
+
+        if msg.startswith("send"):
+            msg = msg.split(" ")
+            msg = [i for i in msg if i]
+            if len(msg) != 2:
+                raise SyntaxError()
+            if msg[1] != "ballots":
+                raise SyntaxError()
+            command["method"] = "send_ballots_to_admins"
+            return command
+
+
+        raise SyntaxError()
 
 
 if __name__ == "__main__":
