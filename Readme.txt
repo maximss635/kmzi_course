@@ -1,5 +1,5 @@
 Запуск сервера
-python server.py --host *HOST* --port *PORT*
+sage --python server.py --host *HOST* --port *PORT*
 
 Запуск клиента
 python client.py --host *HOST* --port *PORT*

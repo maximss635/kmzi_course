@@ -1,12 +1,12 @@
-from src.commit import commit, commit_with_r
-from src.linear_alg import inf_norm_vect, matrix_vector, scalar
-from src.proof_sum import sum_of_commitments, verify_sum_of_commitments
-from src.proof_v import proof_v, verify_v
-from src.public import gen_public_b
-from src.random_polynomials import random_poly
-from src.ring import INTT, NTT
-from src.utils import m_from_vote_arr, randombytes
-from src.voting_classes import Ballot, Tally
+from lib.commit import commit, commit_with_r
+from lib.linear_alg import inf_norm_vect, matrix_vector, scalar
+from lib.proof_sum import sum_of_commitments, verify_sum_of_commitments
+from lib.proof_v import proof_v, verify_v
+from lib.public import gen_public_b
+from lib.random_polynomials import random_poly
+from lib.ring import INTT, NTT
+from lib.utils import m_from_vote_arr, randombytes
+from lib.voting_classes import Ballot, Tally
 
 
 def _secret_share_value(PP, val, n, seed, nonce):

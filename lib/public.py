@@ -1,4 +1,4 @@
-from src.random_polynomials import random_poly
+from lib.random_polynomials import random_poly
 
 
 def gen_public_b(PP, seed):

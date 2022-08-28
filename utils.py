@@ -71,11 +71,11 @@ class BaseConsoleInterface:
 
     @staticmethod
     def _print(output):
-        COMMAND_LOGGER.debug("[output] {}".format(output))
+        COMMAND_LOGGER.debug("[output] {}".format(output.replace("\n", "\\n")))
         print(output)
 
     def _base_parse(self, inp):
-        if (inp == "exit") or (inp == "exi") or (inp == "ex"):
+        if inp in ["exit", "exi", "ex"]:
             self.stop()
             return True
 

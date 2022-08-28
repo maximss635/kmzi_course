@@ -1,10 +1,10 @@
 import argparse
 import ast
-import json
+from copy import deepcopy
 
 from api import ClientAPI, ServerAPI
 from socketlib import BaseServer
-from utils import BaseConsoleInterface, WithLogger, call_with_lock
+from utils import BaseConsoleInterface, WithLogger, call_with_lock, Signleton
 
 
 class MessageFormatError(BaseException):
@@ -43,7 +43,7 @@ class CommandHandler(WithLogger):
         return method(command)
 
 
-class Server(BaseServer):
+class Server(BaseServer, Signleton):
     def __init__(self, host, port):
         BaseServer.__init__(self, host, port)
 
@@ -55,13 +55,19 @@ class Server(BaseServer):
 
         return command_handler.handle_command(msg, self._client_api)
 
+    def get_connections(self):
+        tmp = list(self._connections.values())
+        tmp.remove("0.0.0.0")
+
+        return tmp
+
 
 class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
-    def __init__(self):
+    def __init__(self, server):
         BaseConsoleInterface.__init__(self, "server# ")
         WithLogger.__init__(self, "server")
 
-        self._server_api = ServerAPI()
+        self._server_api = ServerAPI(server)
 
     def run(self):
         BaseConsoleInterface.run(self)
@@ -90,7 +96,7 @@ class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
         msg = msg.strip()
         command["raw"] = msg
 
-        if msg == "help":
+        if msg in ["help", "?"]:
             command["method"] = "help"
             return command
 
@@ -104,6 +110,9 @@ class ServerConsoleInterface(BaseConsoleInterface, WithLogger):
                 return command
             if msg[1] == "calculations":
                 command["method"] = "show_calculations"
+                return command
+            if msg[1] == "clients":
+                command["method"] = "show_clients"
                 return command
             raise SyntaxError()
 
@@ -136,5 +145,5 @@ if __name__ == "__main__":
         print(err)
         exit(1)
 
-    ServerConsoleInterface().run()
+    ServerConsoleInterface(server).run()
     server.stop()

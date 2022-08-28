@@ -51,8 +51,8 @@ class BaseServer(WithLogger):
 
     def _on_open_connection(self):
         cli_socket, cli_addr = self._server_socket.accept()
-        self._logger.debug("New connection: %s", cli_addr[0])
-        self._connections[cli_socket] = cli_addr[0]
+        self._logger.debug("New connection: %s", cli_addr)
+        self._connections[cli_socket] = cli_addr
 
     def _on_new_message(self, event):
         data = event.recv(512)
@@ -158,7 +158,7 @@ class BaseClient(WithLogger):
         answer = answer[1:].decode("utf-8")
 
         if answer:
-            self._logger.debug("Get answer: %s (ret_code=%d)", answer, ret_code)
+            self._logger.debug("Get answer: %s (ret_code=%d)", answer.replace("\n", "\\n"), ret_code)
         else:
             self._logger.warning("Answer is empty")
 

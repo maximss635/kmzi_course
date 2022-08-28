@@ -1,11 +1,11 @@
 from sage.all import *
 
-from src.commit import commit
-from src.linear_alg import scalar
-from src.proof_amo import (proof_amo, proof_amo_to_zero, verify_amo,
+from lib.commit import commit
+from lib.linear_alg import scalar
+from lib.proof_amo import (proof_amo, proof_amo_to_zero, verify_amo,
                            verify_amo_to_zero)
-from src.public import gen_public_b
-from src.utils import randombytes
+from lib.public import gen_public_b
+from lib.utils import randombytes
 
 
 # S = (s_1, ..., s_p); T0 = (t0_1, ..., t0_p); T1 = (t1_1, ..., t1_p)

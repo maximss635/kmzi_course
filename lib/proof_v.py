@@ -1,14 +1,14 @@
 from Crypto.Hash import SHAKE128
 
-from src.automorphism import phi
-from src.linear_alg import (inf_norm_matr, l2_norm_vect, matrix_vector, scalar,
+from lib.automorphism import phi
+from lib.linear_alg import (inf_norm_matr, l2_norm_vect, matrix_vector, scalar,
                             vector_mult_by_scalar)
-from src.public import gen_public_b_with_extra
-from src.random_polynomials import (challenge, discrete_gaussian_vector_y,
+from lib.public import gen_public_b_with_extra
+from lib.random_polynomials import (challenge, discrete_gaussian_vector_y,
                                     random_poly, random_poly_with_zeros,
                                     random_zq)
-from src.ring import INTT
-from src.utils import poly_to_bytes, randombytes, rejection_sampling_vector
+from lib.ring import INTT
+from lib.utils import poly_to_bytes, randombytes, rejection_sampling_vector
 
 
 def get_alpha_gamma(PP, t0, t1, t2, W):

@@ -3,9 +3,9 @@ from os import urandom
 from sage.all import *
 from sage.misc.prandom import random as random_prob
 
-from src.linear_alg import (l2_norm_matr, l2_norm_vect, scalar_matrix_zz,
+from lib.linear_alg import (l2_norm_matr, l2_norm_vect, scalar_matrix_zz,
                             scalar_vector_zz)
-from src.ring import INTT, reset_powers
+from lib.ring import INTT, reset_powers
 
 
 def poly_to_bytes(p):

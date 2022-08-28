@@ -1,7 +1,7 @@
-from src.params import PublicParams
-from src.utils import max_with_index, reset_all
-from src.voting_classes import BBoard
-from src.voting_scheme import tally_all, tally_j, testballots, verify, vote
+from lib.params import PublicParams
+from lib.utils import max_with_index, reset_all
+from lib.voting_classes import BBoard
+from lib.voting_scheme import tally_all, tally_j, testballots, verify, vote
 
 """
 Parameters:

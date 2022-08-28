@@ -1,13 +1,13 @@
 from Crypto.Hash import SHAKE128
 from sage.all import *
 
-from src.commit import commit
-from src.linear_alg import inf_norm_matr, matrix_vector, scalar
-from src.public import gen_public_b
-from src.random_polynomials import (challenge_amo, chi_poly,
+from lib.commit import commit
+from lib.linear_alg import inf_norm_matr, matrix_vector, scalar
+from lib.public import gen_public_b
+from lib.random_polynomials import (challenge_amo, chi_poly,
                                     discrete_gaussian_y, random_poly)
-from src.ring import signed_zq
-from src.utils import poly_to_bytes, randombytes, rejection_sampling_matrix
+from lib.ring import signed_zq
+from lib.utils import poly_to_bytes, randombytes, rejection_sampling_matrix
 
 
 def get_challenge_hash_amo(PP, T, W, p):

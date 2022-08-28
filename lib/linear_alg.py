@@ -1,6 +1,6 @@
 from sage.all import *
 
-from src.ring import signed_zq
+from lib.ring import signed_zq
 
 
 def vector_mult_by_scalar(vect, s):

@@ -1,5 +1,5 @@
-from src.linear_alg import matrix_vector, scalar
-from src.random_polynomials import chi_poly
+from lib.linear_alg import matrix_vector, scalar
+from lib.random_polynomials import chi_poly
 
 
 def commit(PP, B0, b, m, r_seed, nonce):
