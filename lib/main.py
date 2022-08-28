@@ -85,14 +85,9 @@ def main():
     Nc = 5
 
     # Voters' choices (only one '1' is allowed, otherwise - cheating)
+    # if [2, 0, ...] or [1, 1, 0, 0, ...], bulletin will be dropped out
     votes = [
-        [
-            1,
-            0,
-            0,
-            0,
-            0,
-        ],  # if [2, 0, ...] or [1, 1, 0, 0, ...], bulletin will be dropped out
+        [1, 0, 0, 0, 0],
         [0, 0, 0, 0, 1],
         [0, 0, 1, 0, 0],
         [0, 1, 0, 0, 0],

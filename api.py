@@ -1,6 +1,14 @@
-from utils import Signleton
-from lib.main import main as run_all
 from prettytable import PrettyTable
+
+from lib.main import main as run_all
+from lib.params import PublicParams
+from utils import Signleton
+
+
+def make_json(func):
+    def wrap(*args, **kwargs):
+        return {"output": func(*args, **kwargs)}
+    return wrap
 
 
 class CommonStorage(Signleton):
@@ -16,11 +24,38 @@ class ClientAPI:
 
         self._HELP = "get bulletin\nupload ballot\nshow ballot\nhelp"
 
+    @make_json
     def help(self, command):
         return self._HELP
 
     def get_bulletin(self, command):
-        return "get_bulletin {}".format(command)
+        # TODO Разобраться - наверное здесь надо генерить случайным образом
+        votes = [
+            [1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1],
+            [0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+        ]
+
+        bulletin = dict()
+
+        # Generate trusted public parameter
+        bulletin["public_seed"] = "\xc2\x84\x80y\xef\xfew\xaf\n\x03\x95h\xa1\xee\xda}D\xbf\x87\x10a\xf3\xc6\x92\xe7\xa3\xa3\x9dTR\tY"
+
+        # Number of authorities
+        bulletin["Na"] = 2
+
+        # Number of candidates
+        bulletin["Nc"] = 5
+
+        # Number of voters
+        bulletin["Nv_max"] = 10  # max
+
+        PP = PublicParams(bulletin["Na"], bulletin["Nc"], bulletin["Nv_max"])
+
+        return bulletin
 
     def upload_ballot(self, command):
         return "upload_ballot {}".format(command)

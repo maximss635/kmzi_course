@@ -1,3 +1,5 @@
+import ast
+import json
 import logging
 import select
 import socket
@@ -66,22 +68,21 @@ class BaseServer(WithLogger):
 
         # Handle message
         try:
-            answer = self._handle_message(data)
-            ret_code = 0
+            answer_json = self._handle_message(data)
+            answer_json["ret_code"] = 0
         except BaseException as err:
             self._logger.error("Exception while handle message: %s", err)
-            answer = str(err)
-            ret_code = 1
+            answer_json = dict()
+            answer_json["output"] = str(err)
+            answer_json["ret_code"] = 1
 
-        raw_answer = ret_code.to_bytes(1, byteorder="big")
-        if answer:
-            raw_answer += bytes(answer, "utf-8")
+        self._logger.debug("answer_json={}".format(answer_json))
 
+        raw_answer = bytes(json.dumps(answer_json), "utf-8")
         self._logger.debug(
-            "Send answer to %s: %s (ret_code=%d)",
+            "Send answer to %s: %s",
             self._connections[event],
-            answer,
-            ret_code,
+            raw_answer
         )
         event.send(raw_answer)
         SOCKET_LOGGER.debug("[srv send] {}".format(raw_answer))
@@ -153,19 +154,26 @@ class BaseClient(WithLogger):
             raise ConnectionRefusedError()
 
         SOCKET_LOGGER.debug("[cli recv] {}".format(answer))
+        try:
+            answer = ast.literal_eval(answer.decode("utf-8"))
+        except ValueError as err:
+            raise ErrorInServer("Bad answer: {}".format(answer)) from err
 
-        ret_code = int(answer[0])
-        answer = answer[1:].decode("utf-8")
+        if "ret_code" not in answer:
+            raise ErrorInServer("No field 'ret_code' in answer from server")
 
-        if answer:
-            self._logger.debug("Get answer: %s (ret_code=%d)", answer.replace("\n", "\\n"), ret_code)
+        ret_code = answer["ret_code"]
+        output = answer.get("output", "")
+
+        if output:
+            self._logger.debug("Get answer: %s (ret_code=%d)", output.replace("\n", "\\n"), ret_code)
         else:
             self._logger.warning("Answer is empty")
 
         if ret_code != 0:
-            raise ErrorInServer(answer)
+            raise ErrorInServer(output)
 
-        return answer
+        return output
 
 
 SOCKET_LOGGER = logging.getLogger("SOCKET_LOGGER")
