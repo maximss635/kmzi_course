@@ -9,10 +9,16 @@ class CommonStorage(Signleton):
 
 
 class ClientAPI:
+    def __init__(self):
+        self._storage = CommonStorage.instance()
+
     def add_ballot(self):
-        CommonStorage.instance().ballots.append(len(CommonStorage.instance().ballots))
+        self._storage.ballots.append(len(self._storage.ballots))
 
 
 class ServerAPI:
+    def __init__(self):
+        self._storage = CommonStorage.instance()
+
     def show_ballots(self):
-        return str(CommonStorage.instance().ballots)
+        return str(self._storage.ballots)
